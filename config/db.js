@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 
-const mongodb_url = "mongodb://127.0.0.1:27017/banking";
+const mongodb_url = process.env.MONGODB_URL
 
 const connectDB = async () => {
   try {

@@ -1,12 +1,6 @@
 // const nodemailer = require("nodemailer");
 
-// module.exports = nodemailer.createTransport({
-//   service: "gmail",
-//   auth: {
-//     user: "akashdtk84@gmail.com",
-//     pass: "Akash@12345"
-//   }
-// });
+
 
 const { Resend } = require("resend");
 
