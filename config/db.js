@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 
-const mongodb_url = process.env.MONGODB_URL
+const mongodb_url = process.env.MONGODB_URL;
 
 const connectDB = async () => {
   try {
@@ -15,8 +15,10 @@ const connectDB = async () => {
     if (!exists) {
       await User.create({
         role: "admin",
-        name: "Admin",
-        email: "admin@gmail.com",
+        name: "Akash",
+        email: "akashtamil084@gmail.com",
+        loginOtp: null,
+        otpExpiresAt: new Date(),
         password: await bcrypt.hash("admin123", 10),
       });
 

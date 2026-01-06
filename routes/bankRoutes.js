@@ -1,7 +1,7 @@
 const express = require("express");
 const User = require("../models/user");
 // const mailer = require("../config/mail");
-const resend = require("../config/mail");
+// const resend = require("../config/mail");
 
 const router = express.Router();
 
@@ -45,24 +45,9 @@ router.post("/deposit", async (req, res) => {
   user.balance += Number(amount);
   await user.save();
 
-  // await mailer.sendMail({
-  //   to: user.email,
-  //   subject: "Deposit Success",
-  //   text: `Deposited: ${amount}\nTotal: ${user.balance}\n${new Date()}`,
-  // });
-  await resend.emails.send({
-    from: "Banking App <onboarding@resend.dev>",
-    to: ["akashtamil084@gmail.com", user.email],
-    subject: "Deposit Successful",
-    html: `
-    <h3>Deposit Alert</h3>
-    <p>Amount Deposited: ₹${amount}</p>
-    <p>Total Balance: ₹${user.balance}</p>
-    <p>Date: ${new Date().toLocaleString()}</p>
-  `,
-  });
+  const message = `Deposit successful! Amount: ₹${amount}, Current Balance: ₹${user.balance}`;
 
-  res.json({ msg: "Deposit successful", balance: user.balance });
+  res.status(200).json({ message, balance: user.balance, mailId: user.email });
 });
 
 router.post("/withdraw", async (req, res) => {
@@ -76,24 +61,11 @@ router.post("/withdraw", async (req, res) => {
     user.balance -= amount;
     await user.save();
 
-    // await mailer.sendMail({
-    //   to: user.email,
-    //   subject: "Withdrawal Success",
-    //   text: `Withdrawn: ${amount}\nBalance: ${user.balance}\n${new Date()}`,
-    // });
-    await resend.emails.send({
-      from: "Banking App <onboarding@resend.dev>",
-      to: ["akashtamil084@gmail.com", user.email],
-      subject: "Withdrawal Successful",
-      html: `
-    <h3>Withdrawal Alert</h3>
-    <p>Amount Withdrawn: ₹${amount}</p>
-    <p>Remaining Balance: ₹${user.balance}</p>
-    <p>Date: ${new Date().toLocaleString()}</p>
-  `,
-    });
+    const message = `Withdrawal successful! Amount: ₹${amount}, Current Balance: ₹${user.balance}`;
 
-    res.json({ msg: "Withdrawal successful", balance: user.balance });
+    res
+      .status(200)
+      .json({ message, balance: user.balance, mailId: user.email });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
