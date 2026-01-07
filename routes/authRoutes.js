@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const upload = require("../config/multer");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
@@ -48,6 +49,7 @@ router.post("/login", async (req, res) => {
 
       return res.json({
         msg: "Verification code sent to email",
+        user,
       });
     }
   } catch (err) {
@@ -56,10 +58,12 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/create-user", async (req, res) => {
+router.post("/create-user", upload.single("profilePic"), async (req, res) => {
   try {
-    const { name, email, balance } = req.body;
-    const hashed = await bcrypt.hash(req.body.password, 10);
+    const { name, email, balance, password } = req.body;
+
+    const hashed = await bcrypt.hash(password, 10);
+
     await User.create({
       email,
       name,
@@ -67,11 +71,13 @@ router.post("/create-user", async (req, res) => {
       password: hashed,
       role: "user",
       googleVerified: false,
-      password: null,
+      status: "ACTIVE",
+      profilePic: req.file ? `/uploads/${req.file.filename}` : null,
     });
-    res.json({ msg: "User Created, Google verification pending." });
+
+    res.json({ msg: "User created successfully" });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "user create failed" });
   }
 });
 
@@ -120,7 +126,7 @@ router.post("/create-user", async (req, res) => {
 
 router.post("/verify-otp", async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, verifyotp } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -135,7 +141,7 @@ router.post("/verify-otp", async (req, res) => {
       return res.status(400).json({ msg: "OTP expired" });
     }
 
-    if (user.loginOtp !== otp) {
+    if (user.loginOtp !== verifyotp) {
       return res.status(400).json({ msg: "Invalid verification code" });
     }
 

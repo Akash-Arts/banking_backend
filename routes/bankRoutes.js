@@ -1,7 +1,6 @@
 const express = require("express");
 const User = require("../models/user");
-// const mailer = require("../config/mail");
-// const resend = require("../config/mail");
+const Transaction = require("../models/transaction");
 
 const router = express.Router();
 
@@ -46,8 +45,15 @@ router.post("/deposit", async (req, res) => {
   await user.save();
 
   const message = `Deposit successful! Amount: ₹${amount}, Current Balance: ₹${user.balance}`;
+  const transaction = await Transaction.create({
+    userId: user._id,
+    type: "DEPOSIT",
+    amount,
+    balanceAfter: user.balance,
+    description: "Amount deposited",
+  });
 
-  res.status(200).json({ message, balance: user.balance, mailId: user.email });
+  res.status(200).json({ message, balance: user.balance, mailId: user.email , transaction});
 });
 
 router.post("/withdraw", async (req, res) => {
@@ -62,10 +68,17 @@ router.post("/withdraw", async (req, res) => {
     await user.save();
 
     const message = `Withdrawal successful! Amount: ₹${amount}, Current Balance: ₹${user.balance}`;
+   const transaction = await Transaction.create({
+      userId: user._id,
+      type: "WITHDRAW",
+      amount,
+      balanceAfter: user.balance,
+      description: "Amount withdrawn",
+    });
 
     res
       .status(200)
-      .json({ message, balance: user.balance, mailId: user.email });
+      .json({ message, balance: user.balance, mailId: user.email, transaction });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
